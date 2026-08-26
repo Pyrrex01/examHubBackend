@@ -1,0 +1,33 @@
+
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: examhub-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: ${DB_NAME:-examhub}
+      POSTGRES_USER: ${DB_USER:-examhub}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD est obligatoire — voir .env.example}
+
+      POSTGRES_INITDB_ARGS: '--encoding=UTF8 --locale=C'
+      TZ: UTC
+      PGTZ: UTC
+
+    ports:
+      - '127.0.0.1:${DB_PORT:-5432}:5432'
+
+    volumes:
+      - examhub_pgdata:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER:-examhub} -d ${DB_NAME:-examhub}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+volumes:
+  examhub_pgdata:
+    name: examhub_pgdata
